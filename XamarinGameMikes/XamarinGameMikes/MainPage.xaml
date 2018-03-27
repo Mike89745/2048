@@ -3,9 +3,45 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:XamarinGameMikes"
              x:Class="XamarinGameMikes.MainPage">
-
-	<Label Text="Welcome to Xamarin.Forms!" 
-           VerticalOptions="Center" 
-           HorizontalOptions="Center" />
-
+    <StackLayout>
+        <StackLayout BackgroundColor="AliceBlue" Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+            <StackLayout BackgroundColor="Aqua">
+                <Label>2048</Label>
+            </StackLayout>
+            <StackLayout BackgroundColor="Blue" Orientation="Horizontal">
+                <Label>High score</Label>
+                <Label>Current score</Label>
+            </StackLayout>
+        </StackLayout>
+        <Grid BackgroundColor="Green" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="75"></ColumnDefinition>
+                <ColumnDefinition Width="75"></ColumnDefinition>
+                <ColumnDefinition Width="75"></ColumnDefinition>
+                <ColumnDefinition Width="75"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75"></RowDefinition>
+                <RowDefinition Height="75"></RowDefinition>
+                <RowDefinition Height="75"></RowDefinition>
+                <RowDefinition Height="75"></RowDefinition>
+            </Grid.RowDefinitions>
+            <BoxView Grid.Row="0" Grid.Column="0" Color="Red"></BoxView>
+            <BoxView Grid.Row="1" Grid.Column="0" Color="Blue"></BoxView>
+            <BoxView Grid.Row="2" Grid.Column="0" Color="Red"></BoxView>
+            <BoxView Grid.Row="3" Grid.Column="0" Color="Blue"></BoxView>
+            <BoxView Grid.Row="0" Grid.Column="1" Color="Red"></BoxView>
+            <BoxView Grid.Row="1" Grid.Column="1" Color="Blue"></BoxView>
+            <BoxView Grid.Row="2" Grid.Column="1" Color="Red"></BoxView>
+            <BoxView Grid.Row="3" Grid.Column="1" Color="Blue"></BoxView>
+            <BoxView Grid.Row="0" Grid.Column="2" Color="Red"></BoxView>
+            <BoxView Grid.Row="1" Grid.Column="2" Color="Blue"></BoxView>
+            <BoxView Grid.Row="2" Grid.Column="2" Color="Red"></BoxView>
+            <BoxView Grid.Row="3" Grid.Column="2" Color="Blue"></BoxView>
+            <BoxView Grid.Row="0" Grid.Column="3" Color="Red"></BoxView>
+            <BoxView Grid.Row="1" Grid.Column="3" Color="Blue"></BoxView>
+            <BoxView Grid.Row="2" Grid.Column="3" Color="Red"></BoxView>
+            <BoxView Grid.Row="3" Grid.Column="3" Color="Blue"></BoxView>
+        </Grid>
+    </StackLayout>
 </ContentPage>
