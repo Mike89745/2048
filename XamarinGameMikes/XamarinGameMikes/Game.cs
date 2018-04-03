@@ -11,12 +11,13 @@ namespace XamarinGameMikes
         public List<List<Tile>> Tiles = new List<List<Tile>>();
         public List<List<Label>> GameTiles = new List<List<Label>>();
         private Grid GameGrid;
-
+        public List<List<Tile>> OldTiles = new List<List<Tile>>();
         private CanMakeMove CanMove = new CanMakeMove();
 
         public Label ScoreLabel;
         public Label HighScoreLabel;
 
+        public int OldScore;
         public int score;
         private int HighScore = 50;
 
@@ -47,6 +48,25 @@ namespace XamarinGameMikes
                 }
             }
         }
+        private void CreateOldTileList()
+        {
+            OldTiles = new List<List<Tile>>();
+            int counter = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                OldTiles.Add(new List<Tile>());
+            }
+            foreach (var OldTilesList in OldTiles)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    OldTilesList.Add(new Tile() {
+                        size = Tiles[counter][i].size,
+                    });
+                }
+                counter++;
+            }
+        }
         public void CreateGameField()
         {
             for (int i = 0; i < 4; i++)
@@ -59,7 +79,7 @@ namespace XamarinGameMikes
                 {
                     LabelList.Add(new Label()
                     {
-                        BackgroundColor = Color.Gray,
+                        BackgroundColor = Color.LightGray,
                         HorizontalTextAlignment = TextAlignment.Center,
                         VerticalTextAlignment = TextAlignment.Center,
                     });
@@ -152,10 +172,14 @@ namespace XamarinGameMikes
         }
         public async Task RightAsync()
         {
+          //  Debug.WriteLine("??!");
+            OldScore = score;
+            CreateOldTileList();
             bool CanSpawnNext = false;
             List<Task> Animations = new List<Task>();
             x = 0;
             y = 0;
+            int counter = 0;
             while (x < 4)
             {
                 while (y < 3)
@@ -168,16 +192,11 @@ namespace XamarinGameMikes
                             {
                                 if (Tiles[y][x].size == Tiles[y + 1][x].size)
                                 {
-                                    await Task.WhenAll(
-                                          GameTiles[y][x].TranslateTo(81, 0, 300),
-                                          GameTiles[y][x].FadeTo(0, 300)
-                                    );
+                                    Animations.Add(TileMerge(GameTiles[y][x].X, GameTiles[y][x].Y,Tiles[y][x].size,81,0));
                                     Tiles[y + 1][x].size *= 2;
                                     score += Tiles[y + 1][x].size;
                                     Tiles[y][x].size = 0;
                                     CanSpawnNext = true;
-                                    //  await GameTiles[y][x].TranslateTo(-81, 0, 1);
-                                    // await GameTiles[y][x].FadeTo(100, 1);
                                     y++;
                                     y++;
                                 }
@@ -189,11 +208,17 @@ namespace XamarinGameMikes
                             }
                             else
                             {
-                                // GameTiles[y][x].TranslateTo(75, 0, 300);
-                                Tiles[y + 1][x].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                y++;
+                                counter = 1;
+                                while (Tiles[y + 1][x].size == 0 && y < 3)
+                                {
+                                    Debug.WriteLine("TileMove");
+                                    Tiles[y + 1][x].size = Tiles[y][x].size;
+                                    CanSpawnNext = true;
+                                    Tiles[y][x].size = 0;
+                                    y++;
+                                    counter++;
+                                }
+                                Animations.Add(TileMove(GameTiles[y][x].X, GameTiles[y][x].Y, Tiles[y][x].size, 81*counter, 0));
                             }
                         }
                     }
@@ -204,11 +229,17 @@ namespace XamarinGameMikes
                         {
                             if (Tiles[y + 1][x].size == 0)
                             {
-                                //GameTiles[y][x].TranslateTo(75, 0, 300);
-                                Tiles[y + 1][x].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                y++;
+                                counter = 1;
+                                while (Tiles[y + 1][x].size == 0 && y < 3)
+                                {
+                                    Debug.WriteLine("TileMove1");
+                                    Tiles[y + 1][x].size = Tiles[y][x].size;
+                                    CanSpawnNext = true;
+                                    Tiles[y][x].size = 0;
+                                    counter++;
+                                    y++;
+                                }
+                                Animations.Add(TileMove(GameTiles[y][x].X, GameTiles[y][x].Y, Tiles[y][x].size, 81 * counter, 0));
                             }
                             else
                             {
@@ -220,6 +251,12 @@ namespace XamarinGameMikes
                 y = 0;
                 x++;
             }
+
+            Debug.WriteLine("??!");
+            await Task.WhenAll(
+                Animations
+            );
+            
             if (CanSpawnNext)
             {
                 SpawnRandomTile();
@@ -232,6 +269,8 @@ namespace XamarinGameMikes
         }
         public void Left()
         {
+            OldScore = score;
+            CreateOldTileList();
             x = 3;
             y = 3;
             bool CanSpawnNext = false;
@@ -305,6 +344,8 @@ namespace XamarinGameMikes
         }
         public void Up()
         {
+            OldScore = score;
+            CreateOldTileList();
             x = 3;
             y = 3;
             bool CanSpawnNext = false;
@@ -376,6 +417,8 @@ namespace XamarinGameMikes
         }
         public void Down()
         {
+            OldScore = score;
+            CreateOldTileList();
             x = 0;
             y = 0;
             bool CanSpawnNext = false;
@@ -446,10 +489,36 @@ namespace XamarinGameMikes
             RenderGame();
         }
 
-        public void TileMerge(Tile tile)
+        public void GoBack()
         {
-            GameTiles[y][x].TranslateTo(81, 0, 300);
-            GameTiles[y][x].FadeTo(0, 300);
+            score = OldScore;
+            Tiles = OldTiles;
+            RenderGame();
+        }
+
+        public async Task TileMerge(double X, double Y, int size, int NewX, int NewY)
+        {
+            Debug.WriteLine("TileMerge");
+            Label AnimLabel = new Label()
+            {
+                Text = size.ToString(),
+                TranslationX = X,
+                TranslationY = Y,
+            };
+            await AnimLabel.TranslateTo(81, 0, 300);
+            await AnimLabel.FadeTo(0, 300);
+        }
+        public async Task TileMove(double X, double Y,int size,int NewX,int NewY)
+        {
+            Debug.WriteLine("TileMove");
+            Label AnimLabel = new Label()
+            {
+                Text = size.ToString(),
+                TranslationX = X,
+                TranslationY = Y,
+            };
+
+            await AnimLabel.TranslateTo(NewX, NewY, 300);
         }
     }
     
