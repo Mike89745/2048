@@ -4,16 +4,16 @@
              xmlns:local="clr-namespace:XamarinGameMikes"
              x:Class="XamarinGameMikes.MainPage">
     <StackLayout>
-        <StackLayout BackgroundColor="AliceBlue" Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+        <StackLayout BackgroundColor="AliceBlue" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
             <StackLayout BackgroundColor="Aqua">
                 <Label>2048</Label>
             </StackLayout>
             <StackLayout BackgroundColor="Blue" Orientation="Horizontal">
-                <Label>High score</Label>
-                <Label>Current score</Label>
+                <Label x:Name="HighScore" WidthRequest="150" HeightRequest="75" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"> High score</Label>
+                <Label x:Name="Score" WidthRequest="150" HeightRequest="75" HorizontalTextAlignment="Center" VerticalTextAlignment="Center">Current score</Label>
             </StackLayout>
         </StackLayout>
-        <Grid BackgroundColor="Green" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+        <Grid BackgroundColor="Green" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" x:Name="GameGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="75"></ColumnDefinition>
                 <ColumnDefinition Width="75"></ColumnDefinition>
@@ -26,22 +26,31 @@
                 <RowDefinition Height="75"></RowDefinition>
                 <RowDefinition Height="75"></RowDefinition>
             </Grid.RowDefinitions>
-            <BoxView Grid.Row="0" Grid.Column="0" Color="Red"></BoxView>
-            <BoxView Grid.Row="1" Grid.Column="0" Color="Blue"></BoxView>
-            <BoxView Grid.Row="2" Grid.Column="0" Color="Red"></BoxView>
-            <BoxView Grid.Row="3" Grid.Column="0" Color="Blue"></BoxView>
-            <BoxView Grid.Row="0" Grid.Column="1" Color="Red"></BoxView>
-            <BoxView Grid.Row="1" Grid.Column="1" Color="Blue"></BoxView>
-            <BoxView Grid.Row="2" Grid.Column="1" Color="Red"></BoxView>
-            <BoxView Grid.Row="3" Grid.Column="1" Color="Blue"></BoxView>
-            <BoxView Grid.Row="0" Grid.Column="2" Color="Red"></BoxView>
-            <BoxView Grid.Row="1" Grid.Column="2" Color="Blue"></BoxView>
-            <BoxView Grid.Row="2" Grid.Column="2" Color="Red"></BoxView>
-            <BoxView Grid.Row="3" Grid.Column="2" Color="Blue"></BoxView>
-            <BoxView Grid.Row="0" Grid.Column="3" Color="Red"></BoxView>
-            <BoxView Grid.Row="1" Grid.Column="3" Color="Blue"></BoxView>
-            <BoxView Grid.Row="2" Grid.Column="3" Color="Red"></BoxView>
-            <BoxView Grid.Row="3" Grid.Column="3" Color="Blue"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="0" Grid.Column="0"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="0" Grid.Column="1"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="0" Grid.Column="2"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="0" Grid.Column="3"></BoxView>
+
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="1" Grid.Column="0"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="1" Grid.Column="1"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="1" Grid.Column="2"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="1" Grid.Column="3"></BoxView>
+
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="2" Grid.Column="0"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="2" Grid.Column="1"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="2" Grid.Column="2"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="2" Grid.Column="3"></BoxView>
+
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="3" Grid.Column="0"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="3" Grid.Column="1"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="3" Grid.Column="2"></BoxView>
+            <BoxView WidthRequest="75" HeightRequest="75" Color="LightGray" Grid.Row="3" Grid.Column="3"></BoxView>
         </Grid>
+        <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" HorizontalOptions="CenterAndExpand">
+            <Button Text="Left" x:Name="Left"></Button>
+            <Button Text="Right" x:Name="Right"></Button>
+            <Button Text="Up" x:Name="Up"></Button>
+            <Button Text="Down" x:Name="Down"></Button>
+        </StackLayout>
     </StackLayout>
 </ContentPage>
