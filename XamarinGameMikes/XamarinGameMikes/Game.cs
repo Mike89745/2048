@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Xamarin.Forms;
 using System.Threading.Tasks;
+using System.Reflection;
 namespace XamarinGameMikes
 {
     public class Game
     {
         public List<List<Tile>> Tiles = new List<List<Tile>>();
-        public List<List<Label>> GameTiles = new List<List<Label>>();
+        public List<List<Image>> GameTiles = new List<List<Image>>();
         private Grid GameGrid;
         public List<List<Tile>> OldTiles = new List<List<Tile>>();
         private CanMakeMove CanMove = new CanMakeMove();
@@ -33,6 +34,7 @@ namespace XamarinGameMikes
             CreateGameField();
             CreateTileList();
             RenderGame();
+
         }
         public void CreateTileList()
         {
@@ -60,7 +62,8 @@ namespace XamarinGameMikes
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    OldTilesList.Add(new Tile() {
+                    OldTilesList.Add(new Tile()
+                    {
                         size = Tiles[counter][i].size,
                     });
                 }
@@ -71,17 +74,15 @@ namespace XamarinGameMikes
         {
             for (int i = 0; i < 4; i++)
             {
-                GameTiles.Add(new List<Label>());
+                GameTiles.Add(new List<Image>());
             }
             foreach (var LabelList in GameTiles)
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    LabelList.Add(new Label()
+                    LabelList.Add(new Image()
                     {
                         BackgroundColor = Color.LightGray,
-                        HorizontalTextAlignment = TextAlignment.Center,
-                        VerticalTextAlignment = TextAlignment.Center,
                     });
                 }
             }
@@ -103,7 +104,7 @@ namespace XamarinGameMikes
         {
             return GameGrid;
         }
-        public void RenderGame()
+        public async Task RenderGame()
         {
             x = 0;
             y = 0;
@@ -113,13 +114,12 @@ namespace XamarinGameMikes
                 {
                     if (tile.size != 0)
                     {
-                        GameTiles[y][x].Text = tile.size.ToString();
                         GameTiles[y][x].Opacity = 100;
+                        GameTiles[y][x].Source = "Tile_" + tile.size.ToString() + ".jpg";
                     }
                     else
                     {
                         GameTiles[y][x].Opacity = 0;
-                        GameTiles[y][x].Text = "";
                     }
                     x++;
                 }
@@ -132,7 +132,7 @@ namespace XamarinGameMikes
                 HighScoreLabel.Text = "HighScore" + score.ToString();
             }
         }
-        public void SpawnRandomTile()
+        public async Task SpawnRandomTileAsync()
         {
             Random RandTile = new Random();
             List<TilePos> FreeTiles = new List<TilePos>();
@@ -148,7 +148,8 @@ namespace XamarinGameMikes
                     if (Tile.size == 0)
                     {
 
-                        FreeTiles.Add(new TilePos() {
+                        FreeTiles.Add(new TilePos()
+                        {
                             PosX = x,
                             PosY = y,
                         });
@@ -166,327 +167,330 @@ namespace XamarinGameMikes
                 int rand = RandTile.Next(0, FreeTiles.Count - 1);
                 Tiles[FreeTiles[rand].PosY][FreeTiles[rand].PosX].size = TileSize;
                 score += TileSize;
+                await SpawnAnim(GameTiles[FreeTiles[rand].PosY][FreeTiles[rand].PosX]);
             }
-
-            RenderGame();
+            await RenderGame();
         }
-        public async Task RightAsync()
+        public async Task Right()
         {
-          //  Debug.WriteLine("??!");
             OldScore = score;
             CreateOldTileList();
-            bool CanSpawnNext = false;
             List<Task> Animations = new List<Task>();
+
             x = 0;
             y = 0;
+            int StartX = 0;
+            int StartY = 0;
+            int StartSize = 0;
+
             int counter = 0;
+
+            bool Merge = false;
+            bool CanSpawnNext = false;
+
             while (x < 4)
             {
                 while (y < 3)
                 {
-                    for (int i = 0 + y; i < Tiles[x].Count; i++)
+                    if (Tiles[y][x].size != 0)
                     {
-                        if (y < 3)
+                        StartX = x;
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (y < 3)
                         {
-                            if (Tiles[y + 1][x].size != 0)
+                            if (Tiles[y + 1][x].size == Tiles[y][x].size && Tiles[y][x].size != 0)
                             {
-                                if (Tiles[y][x].size == Tiles[y + 1][x].size)
-                                {
-                                    Animations.Add(TileMerge(GameTiles[y][x].X, GameTiles[y][x].Y,Tiles[y][x].size,81,0));
-                                    Tiles[y + 1][x].size *= 2;
-                                    score += Tiles[y + 1][x].size;
-                                    Tiles[y][x].size = 0;
-                                    CanSpawnNext = true;
-                                    y++;
-                                    y++;
-                                }
+                                Tiles[y + 1][x].size *= 2;
+                                score += Tiles[y + 1][x].size;
+                                Tiles[y][x].size = 0;
+                                CanSpawnNext = true;
+                                y++;
+                                y++;
+                                counter++;
+                                Merge = true;
+                                break;
 
-                                else
-                                {
-                                    y++;
-                                }
                             }
-                            else
+                            else if (Tiles[y + 1][x].size == 0)
                             {
-                                counter = 1;
-                                while (Tiles[y + 1][x].size == 0 && y < 3)
-                                {
-                                    Debug.WriteLine("TileMove");
-                                    Tiles[y + 1][x].size = Tiles[y][x].size;
-                                    CanSpawnNext = true;
-                                    Tiles[y][x].size = 0;
-                                    y++;
-                                    counter++;
-                                }
-                                Animations.Add(TileMove(GameTiles[y][x].X, GameTiles[y][x].Y, Tiles[y][x].size, 81*counter, 0));
-                            }
-                        }
-                    }
-                    y = 0;
-                    for (int i = 0 + y; i < Tiles[x].Count; i++)
-                    {
-                        if (y != 3)
-                        {
-                            if (Tiles[y + 1][x].size == 0)
-                            {
-                                counter = 1;
-                                while (Tiles[y + 1][x].size == 0 && y < 3)
-                                {
-                                    Debug.WriteLine("TileMove1");
-                                    Tiles[y + 1][x].size = Tiles[y][x].size;
-                                    CanSpawnNext = true;
-                                    Tiles[y][x].size = 0;
-                                    counter++;
-                                    y++;
-                                }
-                                Animations.Add(TileMove(GameTiles[y][x].X, GameTiles[y][x].Y, Tiles[y][x].size, 81 * counter, 0));
+                                Tiles[y + 1][x].size = Tiles[y][x].size;
+                                CanSpawnNext = true;
+                                Tiles[y][x].size = 0;
+                                y++;
+                                counter++;
                             }
                             else
                             {
                                 y++;
                             }
                         }
+                        if (counter != 0)
+                        {
+                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, 81 * counter, (int)GameTiles[StartY][StartX].Y, Merge));
+                        }
+                        Merge = false;
+                        counter = 0;
                     }
+                    else
+                    {
+                        y++;
+                    }
+
                 }
                 y = 0;
                 x++;
             }
 
-            Debug.WriteLine("??!");
-            await Task.WhenAll(
-                Animations
-            );
-            
+            await Task.WhenAll(Animations);
+
             if (CanSpawnNext)
             {
-                SpawnRandomTile();
+                SpawnRandomTileAsync();
+                CreateOldTileList();
             }
             else if (!CanMove.CanMove(Tiles))
             {
                 Debug.WriteLine("umrels");
             }
-            RenderGame();
+            await RenderGame();
         }
-        public void Left()
+        public async Task Left()
         {
             OldScore = score;
             CreateOldTileList();
+            List<Task> Animations = new List<Task>();
+
             x = 3;
             y = 3;
+            int StartX = 0;
+            int StartY = 0;
+            int StartSize = 0;
+
+            int counter = 0;
+
+            bool Merge = false;
             bool CanSpawnNext = false;
             while (x >= 0)
             {
                 while (y > 0)
                 {
-                    for (int i = 0 + y; i >= 0; i--)
+                    if (Tiles[y][x].size != 0)
                     {
-
-                        if (y >= 1)
+                        StartX = x;
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (y > 0)
                         {
-                            if (Tiles[y - 1][x].size != 0)
+                            if (Tiles[y - 1][x].size == Tiles[y][x].size && Tiles[y][x].size != 0)
                             {
-                                if (Tiles[y][x].size == Tiles[y - 1][x].size)
-                                {
-                                    Tiles[y - 1][x].size *= 2;
-                                    CanSpawnNext = true;
-                                    score += Tiles[y - 1][x].size;
-                                    Tiles[y][x].size = 0;
+                                Tiles[y - 1][x].size *= 2;
+                                score += Tiles[y - 1][x].size;
+                                Tiles[y][x].size = 0;
+                                CanSpawnNext = true;
+                                y--;
+                                y--;
+                                counter++;
+                                Merge = true;
+                                break;
 
-                                    y--;
-                                    y--;
-                                }
-
-                                else
-                                {
-                                    y--;
-                                }
                             }
-                            else
+                            else if (Tiles[y - 1][x].size == 0)
                             {
                                 Tiles[y - 1][x].size = Tiles[y][x].size;
                                 CanSpawnNext = true;
                                 Tiles[y][x].size = 0;
                                 y--;
-                            }
-                        }
-                    }
-                    y = 3;
-                    for (int i = 0 + y; i >= 0; i--)
-                    {
-                        if (y >= 1)
-                        {
-                            if (Tiles[y - 1][x].size == 0)
-                            {
-                                Tiles[y - 1][x].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                y--;
+                                counter++;
                             }
                             else
                             {
                                 y--;
                             }
                         }
+                        if (counter != 0)
+                        {
+                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, -81 * counter, (int)GameTiles[StartY][StartX].Y, Merge));
+                        }
+                        Merge = false;
+                        counter = 0;
                     }
+                    else
+                    {
+                        y--;
+                    }
+
                 }
                 y = 3;
                 x--;
             }
             if (CanSpawnNext)
             {
-                SpawnRandomTile();
+                SpawnRandomTileAsync();
             }
             else if (!CanMove.CanMove(Tiles))
             {
                 Debug.WriteLine("umrels");
             }
-            RenderGame();
+            await RenderGame();
         }
-        public void Up()
+        public async Task Up()
         {
             OldScore = score;
             CreateOldTileList();
+            List<Task> Animations = new List<Task>();
+
             x = 3;
             y = 3;
+            int StartX = 0;
+            int StartY = 0;
+            int StartSize = 0;
+
+            int counter = 0;
+
+            bool Merge = false;
             bool CanSpawnNext = false;
             while (y >= 0)
             {
                 while (x > 0)
                 {
-                    for (int i = 0 + x; i >= 0; i--)
+                    if (Tiles[y][x].size != 0)
                     {
-                        if (x >= 1)
+                        StartX = x;
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (x > 0)
                         {
-                            if (Tiles[y][x - 1].size != 0)
+                            if (Tiles[y][x - 1].size == Tiles[y][x].size && Tiles[y][x].size != 0)
                             {
-                                if (Tiles[y][x].size == Tiles[y][x - 1].size)
-                                {
-                                    Tiles[y][x - 1].size *= 2;
-                                    CanSpawnNext = true;
-                                    score += Tiles[y][x - 1].size;
-                                    Tiles[y][x].size = 0;
-                                    x--;
-                                    x--;
-                                }
+                                Tiles[y][x - 1].size *= 2;
+                                score += Tiles[y][x - 1].size;
+                                Tiles[y][x].size = 0;
+                                CanSpawnNext = true;
+                                x--;
+                                x--;
+                                counter++;
+                                Merge = true;
+                                break;
 
-                                else
-                                {
-                                    x--;
-                                }
                             }
-                            else
+                            else if (Tiles[y][x - 1].size == 0)
                             {
                                 Tiles[y][x - 1].size = Tiles[y][x].size;
                                 CanSpawnNext = true;
                                 Tiles[y][x].size = 0;
                                 x--;
+                                counter++;
+                            }
+                            else
+                            {
+                                x--;
                             }
                         }
-                    }
-                    x = 3;
-                    for (int i = 0 + x; i >= 0; i--)
-                    {
-                        if (x >= 1)
+                        if (counter != 0)
                         {
-                            if (Tiles[y][x - 1].size == 0)
-                            {
-                                Tiles[y][x - 1].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                x--;
-                            }
-                            else
-                            {
-                                x--;
-                            }
+                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, -81 * counter, Merge));
                         }
+                        Merge = false;
+                        counter = 0;
                     }
+                    else
+                    {
+                        x--;
+                    }
+
                 }
                 x = 3;
                 y--;
             }
             if (CanSpawnNext)
             {
-                SpawnRandomTile();
+                SpawnRandomTileAsync();
             }
             else if (!CanMove.CanMove(Tiles))
             {
                 Debug.WriteLine("umrels");
             }
-            RenderGame();
+            await RenderGame();
         }
-        public void Down()
+        public async Task Down()
         {
             OldScore = score;
             CreateOldTileList();
+            List<Task> Animations = new List<Task>();
+
             x = 0;
             y = 0;
+            int StartX = 0;
+            int StartY = 0;
+            int StartSize = 0;
+
+            int counter = 0;
+
+            bool Merge = false;
             bool CanSpawnNext = false;
             while (y < 4)
             {
                 while (x < 3)
                 {
-                    for (int i = 0 + x; i < Tiles[y].Count; i++)
+                    if (Tiles[y][x].size != 0)
                     {
-                        if (x < 3)
+                        StartX = x;
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (x < 3)
                         {
-                            if (Tiles[y][x + 1].size != 0)
+                            if (Tiles[y][x + 1].size == Tiles[y][x].size && Tiles[y][x].size != 0)
                             {
-                                if (Tiles[y][x].size == Tiles[y][x + 1].size)
-                                {
-                                    Tiles[y][x + 1].size *= 2;
-                                    score += Tiles[y][x + 1].size;
-                                    CanSpawnNext = true;
-                                    Tiles[y][x].size = 0;
-                                    x++;
-                                    x++;
-                                }
+                                Tiles[y][x + 1].size *= 2;
+                                score += Tiles[y][x - 1].size;
+                                Tiles[y][x].size = 0;
+                                CanSpawnNext = true;
+                                x++;
+                                x++;
+                                counter++;
+                                Merge = true;
+                                break;
 
-                                else
-                                {
-                                    x++;
-                                }
+                            }
+                            else if (Tiles[y][x + 1].size == 0)
+                            {
+                                Tiles[y][x + 1].size = Tiles[y][x].size;
+                                CanSpawnNext = true;
+                                Tiles[y][x].size = 0;
+                                x++;
+                                counter++;
                             }
                             else
                             {
-                                Tiles[y][x + 1].size = Tiles[y][x].size;
-                                Tiles[y][x].size = 0;
-                                CanSpawnNext = true;
                                 x++;
                             }
                         }
-                    }
-                    x = 0;
-                    for (int i = 0 + x; i < Tiles[y].Count; i++)
-                    {
-                        if (x != 3)
+                        if (counter != 0)
                         {
-                            if (Tiles[y][x + 1].size == 0)
-                            {
-                                Tiles[y][x + 1].size = Tiles[y][x].size;
-                                Tiles[y][x].size = 0;
-                                CanSpawnNext = true;
-                                x++;
-                            }
-                            else
-                            {
-                                x++;
-                            }
+                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, 81 * counter, Merge));
                         }
+                        Merge = false;
+                        counter = 0;
                     }
+                    else
+                    {
+                        x++;
+                    }
+
                 }
-                x = 0;
+                x = 3;
                 y++;
             }
             if (CanSpawnNext)
             {
-                SpawnRandomTile();
+                SpawnRandomTileAsync();
             }
             else if (!CanMove.CanMove(Tiles))
             {
                 Debug.WriteLine("umrels");
             }
-            RenderGame();
+            await RenderGame();
         }
 
         public void GoBack()
@@ -495,31 +499,38 @@ namespace XamarinGameMikes
             Tiles = OldTiles;
             RenderGame();
         }
-
-        public async Task TileMerge(double X, double Y, int size, int NewX, int NewY)
+        public async Task TileMove(double X, double Y, int size, int NewX, int NewY, bool merge)
         {
-            Debug.WriteLine("TileMerge");
-            Label AnimLabel = new Label()
+            if (size != 0)
             {
-                Text = size.ToString(),
-                TranslationX = X,
-                TranslationY = Y,
-            };
-            await AnimLabel.TranslateTo(81, 0, 300);
-            await AnimLabel.FadeTo(0, 300);
+
+                Image AnimLabel = new Image()
+                {
+                    TranslationX = X,
+                    TranslationY = Y,
+                    BackgroundColor = Color.LightGray,
+                    Source = "Tile_" + size.ToString() + ".jpg",
+                };
+                GameGrid.Children.Add(AnimLabel);
+                if (merge)
+                {
+                    await AnimLabel.TranslateTo(NewX, NewY, 1500);
+                    await AnimLabel.ScaleTo(1.25, 100);
+                    await AnimLabel.ScaleTo(1, 50);
+                    await AnimLabel.FadeTo(0, 50);
+                }
+                else
+                {
+                    await AnimLabel.TranslateTo(NewX, NewY, 1500);
+                }
+                GameGrid.Children.Remove(AnimLabel);
+            }
         }
-        public async Task TileMove(double X, double Y,int size,int NewX,int NewY)
+        public async Task SpawnAnim(Image label)
         {
-            Debug.WriteLine("TileMove");
-            Label AnimLabel = new Label()
-            {
-                Text = size.ToString(),
-                TranslationX = X,
-                TranslationY = Y,
-            };
-
-            await AnimLabel.TranslateTo(NewX, NewY, 300);
+            await label.ScaleTo(1.25, 100);
+            await label.ScaleTo(1, 50);
         }
     }
-    
+
 }
