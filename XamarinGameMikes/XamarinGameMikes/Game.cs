@@ -33,6 +33,7 @@ namespace XamarinGameMikes
             HighScoreLabel.Text = "HighScore" + HighScore.ToString();
             CreateGameField();
             CreateTileList();
+            SpawnRandomTileAsync();
             RenderGame();
 
         }
@@ -176,74 +177,50 @@ namespace XamarinGameMikes
             OldScore = score;
             CreateOldTileList();
             List<Task> Animations = new List<Task>();
-
+            List<Task> AnimationsSecondMove = new List<Task>();
             x = 0;
             y = 0;
-            int StartX = 0;
-            int StartY = 0;
-            int StartSize = 0;
 
-            int counter = 0;
-
-            bool Merge = false;
             bool CanSpawnNext = false;
 
-            while (x < 4)
+            for (int j = 0; j < 4; j++)
             {
-                while (y < 3)
+                for (int i = 3; i >= 0; i--)
                 {
-                    if (Tiles[y][x].size != 0)
+                    for (int k = i - 1; k >= 0; k--)
                     {
-                        StartX = x;
-                        StartY = y;
-                        StartSize = Tiles[y][x].size;
-                        while (y < 3)
+                        if (Tiles[k][j].size == 0)
                         {
-                            if (Tiles[y + 1][x].size == Tiles[y][x].size && Tiles[y][x].size != 0)
+                            continue;
+                        }
+                        else if (Tiles[k][j].size == Tiles[i][j].size)
+                        {
+                            Tiles[i][j].size *= 2;
+                            score += Tiles[i][j].size;
+                            Tiles[k][j].size = 0;
+                            CanSpawnNext = true;
+                            await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[i][j].X, true);
+                            break;
+                        }
+                        else
+                        {
+                            if (Tiles[i][j].size == 0 && Tiles[k][j].size != 0)
                             {
-                                Tiles[y + 1][x].size *= 2;
-                                score += Tiles[y + 1][x].size;
-                                Tiles[y][x].size = 0;
+                                Tiles[i][j].size = Tiles[k][j].size;
+                                Tiles[k][j].size = 0;
+                                i++;
                                 CanSpawnNext = true;
-                                y++;
-                                y++;
-                                counter++;
-                                Merge = true;
+                                await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[k][j].X, false);
                                 break;
-
                             }
-                            else if (Tiles[y + 1][x].size == 0)
+                            else if (Tiles[i][j].size != 0)
                             {
-                                Tiles[y + 1][x].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                y++;
-                                counter++;
-                            }
-                            else
-                            {
-                                y++;
+                                break;
                             }
                         }
-                        if (counter != 0)
-                        {
-                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, 81 * counter, (int)GameTiles[StartY][StartX].Y, Merge));
-                        }
-                        Merge = false;
-                        counter = 0;
                     }
-                    else
-                    {
-                        y++;
-                    }
-
                 }
-                y = 0;
-                x++;
             }
-
-            await Task.WhenAll(Animations);
-
             if (CanSpawnNext)
             {
                 SpawnRandomTileAsync();
@@ -263,66 +240,44 @@ namespace XamarinGameMikes
 
             x = 3;
             y = 3;
-            int StartX = 0;
-            int StartY = 0;
-            int StartSize = 0;
-
-            int counter = 0;
-
-            bool Merge = false;
             bool CanSpawnNext = false;
-            while (x >= 0)
+            for (int j = 0; j < 4; j++)
             {
-                while (y > 0)
+                for (int i = 3; i >= 0; i--)
                 {
-                    if (Tiles[y][x].size != 0)
+                    for (int k = i - 1; k >= 0; k--)
                     {
-                        StartX = x;
-                        StartY = y;
-                        StartSize = Tiles[y][x].size;
-                        while (y > 0)
+                        if (Tiles[k][j].size == 0)
                         {
-                            if (Tiles[y - 1][x].size == Tiles[y][x].size && Tiles[y][x].size != 0)
+                            continue;
+                        }
+                        else if (Tiles[k][j].size == Tiles[i][j].size)
+                        {
+                            Tiles[i][j].size *= 2;
+                            score += Tiles[i][j].size;
+                            Tiles[k][j].size = 0;
+                            CanSpawnNext = true;
+                            await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[k][j].X, true);
+                            break;
+                        }
+                        else
+                        {
+                            if (Tiles[i][j].size == 0 && Tiles[k][j].size != 0)
                             {
-                                Tiles[y - 1][x].size *= 2;
-                                score += Tiles[y - 1][x].size;
-                                Tiles[y][x].size = 0;
+                                Tiles[i][j].size = Tiles[k][j].size;
+                                Tiles[k][j].size = 0;
+                                i++;
                                 CanSpawnNext = true;
-                                y--;
-                                y--;
-                                counter++;
-                                Merge = true;
+                                await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[k][j].X, false);
                                 break;
-
                             }
-                            else if (Tiles[y - 1][x].size == 0)
+                            else if (Tiles[i][j].size != 0)
                             {
-                                Tiles[y - 1][x].size = Tiles[y][x].size;
-                                CanSpawnNext = true;
-                                Tiles[y][x].size = 0;
-                                y--;
-                                counter++;
-                            }
-                            else
-                            {
-                                y--;
+                                break;
                             }
                         }
-                        if (counter != 0)
-                        {
-                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, -81 * counter, (int)GameTiles[StartY][StartX].Y, Merge));
-                        }
-                        Merge = false;
-                        counter = 0;
                     }
-                    else
-                    {
-                        y--;
-                    }
-
                 }
-                y = 3;
-                x--;
             }
             if (CanSpawnNext)
             {
@@ -350,7 +305,8 @@ namespace XamarinGameMikes
 
             bool Merge = false;
             bool CanSpawnNext = false;
-            while (y >= 0)
+            
+             while (y >= 0)
             {
                 while (x > 0)
                 {
@@ -389,7 +345,7 @@ namespace XamarinGameMikes
                         }
                         if (counter != 0)
                         {
-                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, -81 * counter, Merge));
+                        // Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, -81 * counter, Merge));
                         }
                         Merge = false;
                         counter = 0;
@@ -468,7 +424,7 @@ namespace XamarinGameMikes
                         }
                         if (counter != 0)
                         {
-                            Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, 81 * counter, Merge));
+                          //  Animations.Add(TileMove(GameTiles[StartY][StartX].X, GameTiles[StartY][StartX].Y, StartSize, (int)GameTiles[StartY][StartX].X, 81 * counter, Merge));
                         }
                         Merge = false;
                         counter = 0;
@@ -479,7 +435,7 @@ namespace XamarinGameMikes
                     }
 
                 }
-                x = 3;
+                x = 0;
                 y++;
             }
             if (CanSpawnNext)
@@ -514,14 +470,14 @@ namespace XamarinGameMikes
                 GameGrid.Children.Add(AnimLabel);
                 if (merge)
                 {
-                    await AnimLabel.TranslateTo(NewX, NewY, 1500);
+                    await AnimLabel.TranslateTo(NewX, NewY, 150);
                     await AnimLabel.ScaleTo(1.25, 100);
                     await AnimLabel.ScaleTo(1, 50);
                     await AnimLabel.FadeTo(0, 50);
                 }
                 else
                 {
-                    await AnimLabel.TranslateTo(NewX, NewY, 1500);
+                    await AnimLabel.TranslateTo(NewX, NewY, 150);
                 }
                 GameGrid.Children.Remove(AnimLabel);
             }
