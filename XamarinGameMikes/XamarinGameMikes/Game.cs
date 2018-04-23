@@ -22,6 +22,7 @@ namespace XamarinGameMikes
         public int score;
         private int HighScore = 50;
 
+      
         int x = 0;
         int y = 0;
 
@@ -177,49 +178,124 @@ namespace XamarinGameMikes
             OldScore = score;
             CreateOldTileList();
             List<Task> Animations = new List<Task>();
-            List<Task> AnimationsSecondMove = new List<Task>();
             x = 0;
-            y = 0;
+            y = 2;
+
+            int counter = 0;
+
+            int StartY = 0;
+            int StartSize = 0;
 
             bool CanSpawnNext = false;
 
-            for (int j = 0; j < 4; j++)
+            while (x < 4)
             {
-                for (int i = 3; i >= 0; i--)
+                Debug.WriteLine("Step 1 "  + y);
+                while (y > 0)
                 {
-                    for (int k = i - 1; k >= 0; k--)
+                    if (Tiles[y][x].size != 0)
                     {
-                        if (Tiles[k][j].size == 0)
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (y > 0)
                         {
-                            continue;
-                        }
-                        else if (Tiles[k][j].size == Tiles[i][j].size)
-                        {
-                            Tiles[i][j].size *= 2;
-                            score += Tiles[i][j].size;
-                            Tiles[k][j].size = 0;
-                            CanSpawnNext = true;
-                            await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[i][j].X, true);
-                            break;
-                        }
-                        else
-                        {
-                            if (Tiles[i][j].size == 0 && Tiles[k][j].size != 0)
+                            if (Tiles[y + 1][x].size == 0)
                             {
-                                Tiles[i][j].size = Tiles[k][j].size;
-                                Tiles[k][j].size = 0;
-                                i++;
-                                CanSpawnNext = true;
-                                await TileMove(GameTiles[k][j].X, GameTiles[k][j].Y, Tiles[k][j].size, 76, (int)GameTiles[k][j].X, false);
-                                break;
+                                Tiles[y + 1][x].size = Tiles[y][x].size;
+                                Tiles[y][x].size = 0;
+                                counter++;
+                                y--;
                             }
-                            else if (Tiles[i][j].size != 0)
+                            else
                             {
+                                y--;
                                 break;
                             }
                         }
+                        Animations.Add(TileMove(GameTiles[StartY][x].X, GameTiles[StartY][x].Y, StartSize, 81 * counter, (int)GameTiles[StartY][x].Y, false));
+                        y = StartY;
+                        counter = 0;
+                    }
+                    else
+                    {
+                        y--;
                     }
                 }
+
+                Debug.WriteLine("Step 2");
+                await Task.WhenAll(Animations);
+                Animations = new List<Task>();
+                counter = 0;
+                y = 2;
+
+                while (y > 0)
+                {
+                    if (Tiles[y][x].size != 0)
+                    {
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        if (Tiles[y][x].size == Tiles[y + 1][x].size)
+                        {
+                            Tiles[y + 1][x].size *= 2;
+                            Tiles[y][x].size = 0;
+                            score += Tiles[y + 1][x].size;
+                            counter++;
+                            y--;
+                            y--;
+                        }
+                        Animations.Add(TileMove(GameTiles[StartY][x].X, GameTiles[StartY][x].Y, StartSize, 81 * counter, (int)GameTiles[StartY][x].Y, true));
+                        y = StartY;
+                        counter = 0;
+                    }
+                    else
+                    {
+                        y--;
+                    }
+                }
+
+                Debug.WriteLine("Step 3");
+                await Task.WhenAll(Animations);
+                Animations = new List<Task>();
+                counter = 0;
+                y = 2;
+
+                while (y > 0)
+                {
+                    if (Tiles[y][x].size != 0)
+                    {
+                        StartY = y;
+                        StartSize = Tiles[y][x].size;
+                        while (y < 3)
+                        {
+                            if (Tiles[y + 1][x].size == 0)
+                            {
+                                Tiles[y + 1][x].size = Tiles[y][x].size;
+                                Tiles[y][x].size = 0;
+                                counter++;
+                                y--;
+                            }
+                            else
+                            {
+                                y--;
+                                break;
+                            }
+                        }
+                        Animations.Add(TileMove(GameTiles[StartY][x].X, GameTiles[StartY][x].Y, StartSize, 81 * counter, (int)GameTiles[StartY][x].Y, false));
+                        y = StartY;
+                        counter = 0;
+                    }
+                    else
+                    {
+                        y--;
+                    }
+                }
+
+                Debug.WriteLine("----Finish----");
+                await Task.WhenAll(Animations);
+                Animations = new List<Task>();
+                counter = 0;
+                y = 2;
+                x++;
             }
             if (CanSpawnNext)
             {
