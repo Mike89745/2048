@@ -8,34 +8,30 @@ using Xamarin.Forms;
 
 namespace XamarinGameMikes
 {
-	public partial class MainPage : ContentPage, ISwipeCallBack
-	{
+    public partial class MainPage : ContentPage, ISwipeCallBack
+    {
         public Game gameManager;
 
         public MainPage()
         {
             InitializeComponent();
-            gameManager = new Game(GameGrid,Score,HighScore);
+            gameManager = new Game(GameGrid, Score, HighScore);
             SwipeListener swipeListener = new SwipeListener(GameGrid, this);
-            gameManager.SpawnRandomTile();
 
-            Left.Command = new Command(() => gameManager.Left());
-            Right.Command = new Command(() => gameManager.RightAsync());
-            Up.Command = new Command(() => gameManager.Up());
-            Down.Command = new Command(() => gameManager.Down());
+            Left.Command = new Command(async () => await gameManager.Left());
+            Right.Command = new Command(async () => await gameManager.Right());
+            Up.Command = new Command(async () => await gameManager.Up());
+            Down.Command = new Command(async () => await gameManager.Down());
             Goback.Command = new Command(() => gameManager.GoBack());
         }
 
-        public void onBottomSwipe(View view)
+        public async Task onBottomSwipeAsync(View view)
         {
-            //Debug.WriteLine("BottomSwipe");
-            gameManager.Down();
+            await gameManager.Down();
         }
-
-        public void onLeftSwipe(View view)
+        public async Task onLeftSwipeAsync(View view)
         {
-           // Debug.WriteLine("LeftSwipe");
-            gameManager.Left();
+            await gameManager.Left();
         }
 
         public void onNothingSwiped(View view)
@@ -43,16 +39,14 @@ namespace XamarinGameMikes
             //Debug.WriteLine("NothingSwiped");
         }
 
-        public async Task onRightSwipe(View view)
+        public async Task onRightSwipeAsync(View view)
         {
-          //  Debug.WriteLine("RightSwipe");
-            await gameManager.RightAsync();
+            await gameManager.Right();
         }
 
-        public void onTopSwipe(View view)
+        public async Task onTopSwipeAsync(View view)
         {
-           // Debug.WriteLine("TopSwipe");
-            gameManager.Up();
+            await gameManager.Up();
         }
     }
 }

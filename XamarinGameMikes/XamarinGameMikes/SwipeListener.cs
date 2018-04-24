@@ -44,19 +44,19 @@ namespace XamarinGameMikes
 
                     if (translatedX < 0 && Math.Abs(translatedX) > Math.Abs(translatedY))
                     {
-                        mISwipeCallback.onLeftSwipe(Content);
+                        mISwipeCallback.onLeftSwipeAsync(Content);
                     }
                     else if (translatedX > 0 && translatedX > Math.Abs(translatedY))
                     {
-                        mISwipeCallback.onRightSwipe(Content);
+                        mISwipeCallback.onRightSwipeAsync(Content);
                     }
                     else if (translatedY < 0 && Math.Abs(translatedY) > Math.Abs(translatedX))
                     {
-                        mISwipeCallback.onTopSwipe(Content);
+                        mISwipeCallback.onTopSwipeAsync(Content);
                     }
                     else if (translatedY > 0 && translatedY > Math.Abs(translatedX))
                     {
-                        mISwipeCallback.onBottomSwipe(Content);
+                        mISwipeCallback.onBottomSwipeAsync(Content);
                     }
                     else
                     {
